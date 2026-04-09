@@ -88,40 +88,40 @@ CACHE_TTL = 3600  # seconds each per-topic cache entry is valid
 # Temas base. Si metemos uno nuevo, tocar queries y avatar también.
 
 TOPICS = {
-    "💰 Economía": ["econom", "mercado", "bolsa", "inflaci", "empresa", "banco",
+    "Economía": ["econom", "mercado", "bolsa", "inflaci", "empresa", "banco",
                     "finanz", "pib", "deuda", "presupuest", "ibex", "euro",
                     "precio", "impuest"],
-    "⚽ Deporte":  ["deporte", "fútbol", "futbol", "baloncesto", "tenis",
+    "Deporte":  ["deporte", "fútbol", "futbol", "baloncesto", "tenis",
                     "atletismo", "liga", "champions", "real madrid", "barcelona",
                     "selección", "gol", "nba", "mundial", "olimp"],
-    "🏛️ Política": ["polític", "gobierno", "elecciones", "congreso", "partido",
+    "Política": ["polític", "gobierno", "elecciones", "congreso", "partido",
                     "ministro", "presidente", "senado", "pp ", "psoe", "vox ",
                     "podemos", "parlament", "cortes", "diputad", "ayuso",
                     "sánchez", "feijóo"],
-    "👥 Sociedad": ["sociedad", "educacion", "sanidad", "salud", "clima",
+    "Sociedad": ["sociedad", "educacion", "sanidad", "salud", "clima",
                     "medio ambiente", "cultura", "inmigr", "vivienda", "pensión",
                     "trabajo", "empleo", "accidente", "crimen", "suceso"],
-    "🎨 Arte":     ["arte", "música", "musica", "cine", "teatro", "exposición",
+    "Arte":     ["arte", "música", "musica", "cine", "teatro", "exposición",
                     "festival", "concierto", "película", "serie", "libro",
                     "diseño", "moda"],
 }
 
-# Queries por tema para /v2/everything.
+
 TOPIC_QUERIES = {
-    "💰 Economía": "economia OR bolsa OR inflacion OR empresa OR mercado",
-    "⚽ Deporte":  "futbol OR deporte OR liga OR baloncesto OR tenis",
-    "🏛️ Política": "politica OR gobierno OR congreso OR elecciones OR ministro",
-    "👥 Sociedad": "sociedad OR sanidad OR educacion OR vivienda OR empleo",
-    "🎨 Arte":     "cine OR musica OR arte OR teatro OR cultura",
+    "Economía": "economia OR bolsa OR inflacion OR empresa OR mercado",
+    "Deporte":  "futbol OR deporte OR liga OR baloncesto OR tenis",
+    "Política": "politica OR gobierno OR congreso OR elecciones OR ministro",
+    "Sociedad": "sociedad OR sanidad OR educacion OR vivienda OR empleo",
+    "Arte":     "cine OR musica OR arte OR teatro OR cultura",
 }
 
 # Avatares por tema (opcional).
 AVATAR_IMAGES = {
-    "💰 Economía": "avatar_economia.png",
-    "⚽ Deporte":  "avatar_deporte.png",
-    "🏛️ Política": "avatar_politica.png",
-    "👥 Sociedad": "avatar_sociedad.png",
-    "🎨 Arte":     "avatar_arte.png",
+    "Economía": "avatar_economia.png",
+    "Deporte":  "avatar_deporte.png",
+    "Política": "avatar_politica.png",
+    "Sociedad": "avatar_sociedad.png",
+    "Arte":     "avatar_arte.png",
 }
 
 # Prompt principal de Adela.
@@ -682,7 +682,7 @@ class AvatarAdela:
             self._avatar   = c.create_image(cx, ch + 20, image=img, anchor="s")
         else:
             self._avatar   = c.create_text(
-                cx, ch - 40, text="👩", font=("Arial", 110), anchor="s")
+                cx, ch - 40, text=".", font=("Arial", 110), anchor="s")
 
   # Burbuja "redondeada" hecha con piezas superpuestas.
         BW, BH, r = 460, 110, 18
@@ -900,13 +900,13 @@ class AdelaBot:
     def _build_sidebar(self, canvas: tk.Canvas, SB_W: int, BODY: int) -> None:
         SB_BG = "#050A19"
         MENU = [
-            ("🏠", "Inicio"),
-            ("📰", "Noticias de hoy"),
-            ("🔵", "Breaking News"),
-            ("📊", "Análisis Diario"),
-            ("📈", "Tendencias"),
-            ("🔖", "Guardadas"),
-            ("⚙️", "Ajustes"),
+            ("", "Inicio"),
+            ("", "Noticias de hoy"),
+            ("", "Breaking News"),
+            ("", "Análisis Diario"),
+            ("", "Tendencias"),
+            ("", "Guardadas"),
+            ("", "Ajustes"),
         ]
         y = 24
         for icon, label in MENU:
@@ -1018,7 +1018,7 @@ class AdelaBot:
 
         fav_row = tk.Frame(res_frame, bg=RP_BG)
         fav_row.pack(fill="x", pady=(6, 0))
-        self._make_btn(fav_row, "⭐ Guardar", self._save_current_summary,
+        self._make_btn(fav_row, "Guardar", self._save_current_summary,
                        bg="#1A3A1A", hover="#22C55E", pady=6,
                        font=("Segoe UI", 9, "bold")).pack(side="left", padx=(0, 4))
         canvas.create_window(RP_X + RP_W // 2, 300,
@@ -1136,7 +1136,7 @@ class AdelaBot:
                 text="OpenAI no encontrada · NewsAPI OK", fg=C_GREY_SEC)
         else:
             self._lbl_status.config(
-                text="⚠️ Faltan claves en variables de entorno", fg=C_RED_ERR)
+                text="Faltan claves en variables de entorno", fg=C_RED_ERR)
 
     def _greet(self) -> None:
         text = "Buenos días. Soy Adela, tu asistente de noticias. ¿Qué quieres saber hoy?"
@@ -1285,9 +1285,9 @@ class AdelaBot:
         try:
             with open(FAVOURITES_FILE, "w", encoding="utf-8") as f:
                 json.dump(self._favourites, f, ensure_ascii=False, indent=2)
-            self._ui(self._set_status, "⭐ Guardado en favoritos", C_STATUS_OK)
+            self._ui(self._set_status, "Guardado en favoritos", C_STATUS_OK)
         except Exception as exc:
-            self._ui(self._set_status, f"❌ Error guardando: {exc}", C_RED_ERR)
+            self._ui(self._set_status, f". Error guardando: {exc}", C_RED_ERR)
 
     def _save_current_summary(self) -> None:
         text = self._lbl_summary.cget("text")
@@ -1320,16 +1320,16 @@ class AdelaBot:
 
     def _show_favourites_window(self) -> None:
         win = tk.Toplevel(self.root)
-        win.title("⭐ Favoritos guardados")
+        win.title("Favoritos guardados")
         win.geometry("600x400")
         win.configure(bg=C_BG_DEEP)
-        tk.Label(win, text="⭐ Favoritos", font=F_TITLE,
+        tk.Label(win, text=Favoritos", font=F_TITLE,
                  bg=C_BG_DEEP, fg=C_WHITE).pack(pady=(16, 8))
 
         if not self._favourites:
             tk.Label(win,
                      text="No hay favoritos guardados aún.\n"
-                          "Usa el botón ⭐ Guardar para añadir.",
+                          "Usa el botón Guardar para añadir.",
                      bg=C_BG_DEEP, fg=C_GREY_SEC, font=F_BODY).pack(pady=20)
         else:
             lb = tk.Listbox(
@@ -1373,13 +1373,13 @@ class AdelaBot:
     def _fetch_and_summarise(self) -> None:
         """Obtiene un artículo aleatorio del tema y arranca el flujo."""
         if not self._news_key:
-            self._set_status("❌ NEWS_API_KEY no configurada", C_RED_ERR)
+            self._set_status("NEWS_API_KEY no configurada", C_RED_ERR)
             self.avatar.set_pose("error")
             self._btn_voice.config(state="normal")
             self._btn_stop.config(state="disabled", fg=C_GREY_SEC)
             return
         if not self._ai:
-            self._set_status("❌ OPENAI_API_KEY no configurada", C_RED_ERR)
+            self._set_status("OPENAI_API_KEY no configurada", C_RED_ERR)
             self.avatar.set_pose("error")
             self._btn_voice.config(state="normal")
             return
@@ -1420,7 +1420,7 @@ class AdelaBot:
 
             except Exception as exc:
                 msg = str(exc)
-                self._ui(self._set_status, f"❌ {msg}", C_RED_ERR)
+                self._ui(self._set_status, f"{msg}", C_RED_ERR)
                 bubble = (
                     "Límite de NewsAPI alcanzado. Vuelve en unos minutos."
                     if any(k in msg.lower() for k in ("límite", "rate", "limited"))
@@ -1476,11 +1476,11 @@ class AdelaBot:
 
             self._audio.speak(_clean_for_tts(full_text))
             self._ui(self.avatar.set_pose, "happy")
-            self._ui(self._set_status, "✅ ¡Completado!", C_STATUS_OK)
+            self._ui(self._set_status, "¡Completado!", C_STATUS_OK)
 
         except Exception as exc:
             msg = str(exc)
-            self._ui(self._set_status, f"❌ {msg}", C_RED_ERR)
+            self._ui(self._set_status, f"{msg}", C_RED_ERR)
             if any(k in msg.lower() for k in ("límite", "rate", "limited")):
                 bubble = "Se ha alcanzado el límite de NewsAPI. Vuelve en unos minutos."
             elif "api" in msg.lower() and "key" in msg.lower():
@@ -1497,16 +1497,16 @@ class AdelaBot:
   # --- Modo voz
 
     _VOICE_TOPIC_MAP = {
-        "fútbol":    "⚽ Deporte",   "futbol":    "⚽ Deporte",
-        "deporte":   "⚽ Deporte",   "baloncesto":"⚽ Deporte",
-        "economía":  "💰 Economía",  "economia":  "💰 Economía",
-        "bolsa":     "💰 Economía",  "mercados":  "💰 Economía",
-        "política":  "🏛️ Política", "politica":  "🏛️ Política",
-        "gobierno":  "🏛️ Política", "elecciones":"🏛️ Política",
-        "sociedad":  "👥 Sociedad",  "educación": "👥 Sociedad",
-        "educacion": "👥 Sociedad",  "sanidad":   "👥 Sociedad",
-        "arte":      "🎨 Arte",      "cine":      "🎨 Arte",
-        "música":    "🎨 Arte",      "musica":    "🎨 Arte",
+        "fútbol":    "Deporte",   "futbol":    "Deporte",
+        "deporte":   "Deporte",   "baloncesto":"Deporte",
+        "economía":  "Economía",  "economia":  "Economía",
+        "bolsa":     "Economía",  "mercados":  "Economía",
+        "política":  "Política", "politica":  "Política",
+        "gobierno":  "Política", "elecciones":"Política",
+        "sociedad":  "Sociedad",  "educación": "Sociedad",
+        "educacion": "Sociedad",  "sanidad":   "Sociedad",
+        "arte":      "Arte",      "cine":      "Arte",
+        "música":    "Arte",      "musica":    "Arte",
     }
 
     def _voice_mode(self) -> None:
@@ -1520,7 +1520,7 @@ class AdelaBot:
             command = self._voice.listen()
             if not command:
                 self._ui(self._set_status,
-                         "❌ No entendí. Di 'fútbol', 'noticias', etc.", C_RED_ERR)
+                         "No entendí. Di 'fútbol', 'noticias', etc.", C_RED_ERR)
                 self._ui(self.avatar.set_pose, "error")
                 self._ui(lambda: self._btn_voice.config(state="normal"))
                 self._ui(lambda: self._btn_stop.config(state="disabled"))
@@ -1531,7 +1531,7 @@ class AdelaBot:
                 None)
             if not topic:
                 self._ui(self._set_status,
-                         "⚠️ Usa: fútbol, economía, política, etc.", C_RED_ERR)
+                         "Usa: fútbol, economía, política, etc.", C_RED_ERR)
                 self._ui(self.avatar.set_pose, "normal")
                 self._ui(lambda: self._btn_voice.config(state="normal"))
                 self._ui(lambda: self._btn_stop.config(state="disabled"))
@@ -1539,7 +1539,7 @@ class AdelaBot:
 
             self.root.after(0, self._select_topic, topic)
             self._ui(self._set_status,
-                     f"✅ Tema: {topic}. Buscando...", C_STATUS_OK)
+                     f"Tema: {topic}. Buscando...", C_STATUS_OK)
             self._ui(self._fetch_and_summarise)
 
         threading.Thread(target=_worker, daemon=True).start()
@@ -1555,7 +1555,7 @@ class AdelaBot:
 
     def _daily_briefing(self) -> None:
         if not self._news_key or not self._ai:
-            self._ui(self._set_status, "❌ Faltan claves API", C_RED_ERR)
+            self._ui(self._set_status, "Faltan claves API", C_RED_ERR)
             return
         self._ui(self._set_status, "Preparando resumen del día...", C_BLUE)
         self._ui(self.avatar.set_pose, "thinking",
@@ -1602,10 +1602,10 @@ class AdelaBot:
                 self._ui(self._set_status, "Leyendo resumen del día...", C_PANEL_SEC)
                 self._audio.speak(_clean_for_tts(briefing))
                 self._ui(self.avatar.set_pose, "happy")
-                self._ui(self._set_status, "✅ Resumen del día completado", C_STATUS_OK)
+                self._ui(self._set_status, "Resumen del día completado", C_STATUS_OK)
 
             except Exception as exc:
-                self._ui(self._set_status, f"❌ Error briefing: {exc}", C_RED_ERR)
+                self._ui(self._set_status, f"Error briefing: {exc}", C_RED_ERR)
                 self._ui(self.avatar.set_pose, "error")
             finally:
                 self._ui(lambda: self._btn_voice.config(state="normal"))
@@ -1619,11 +1619,11 @@ class AdelaBot:
         try:
             if not self._news_key:
                 self._ui(self._set_status,
-                         "❌ NEWS_API_KEY no configurada", C_RED_ERR)
+                         "NEWS_API_KEY no configurada", C_RED_ERR)
                 return
             if not self._ai:
                 self._ui(self._set_status,
-                         "❌ OPENAI_API_KEY no configurada", C_RED_ERR)
+                         "OPENAI_API_KEY no configurada", C_RED_ERR)
                 return
 
             self._ui(self.avatar.set_pose, "thinking",
@@ -1668,10 +1668,10 @@ class AdelaBot:
             self._ui(lambda: self._btn_stop.config(state="normal", fg=C_GREY_SEC))
             self._audio.speak(_clean_for_tts(daily))
             self._ui(self.avatar.set_pose, "happy")
-            self._ui(self._set_status, "✅ Análisis diario completado", C_STATUS_OK)
+            self._ui(self._set_status, "Análisis diario completado", C_STATUS_OK)
 
         except Exception as exc:
-            self._ui(self._set_status, f"❌ Error análisis diario: {exc}", C_RED_ERR)
+            self._ui(self._set_status, f"Error análisis diario: {exc}", C_RED_ERR)
             self._ui(self.avatar.set_pose, "error")
         finally:
             self._ui(lambda: self._btn_voice.config(state="normal"))
@@ -1681,7 +1681,7 @@ class AdelaBot:
 
     def _debate_mode(self) -> None:
         if not self._ai:
-            self._ui(self._set_status, "❌ OpenAI no configurada", C_RED_ERR)
+            self._ui(self._set_status, "OpenAI no configurada", C_RED_ERR)
             return
         current_text = self._lbl_summary.cget("text")
         if not current_text or current_text.startswith("Inicia una"):
@@ -1705,12 +1705,12 @@ class AdelaBot:
                     f"Perspectiva B:\n{b}"
                 )
                 self._ui(self._set_summary, debate_text)
-                self._ui(self._add_to_history, debate_text, "⚖️ Debate")
+                self._ui(self._add_to_history, debate_text, "Debate")
                 self._session_memory.append(
                     {"role": "assistant", "content": debate_text})
 
                 bubble_a = a[:70] + "…" if len(a) > 70 else a
-                self._ui(self.avatar.set_pose, "debate", f"⚖️ {bubble_a}")
+                self._ui(self.avatar.set_pose, "debate", f"{bubble_a}")
                 self._ui(self._set_status,
                          "Leyendo primera perspectiva...", C_PANEL_SEC)
                 self._audio.speak(_clean_for_tts(f"Primera perspectiva. {a}"))
@@ -1718,16 +1718,16 @@ class AdelaBot:
                 if not self._audio._stop_event.is_set():
                     time.sleep(0.8)
                     bubble_b = b[:70] + "…" if len(b) > 70 else b
-                    self._ui(self.avatar.set_pose, "debate", f"⚖️ {bubble_b}")
+                    self._ui(self.avatar.set_pose, "debate", f"{bubble_b}")
                     self._ui(self._set_status,
                              "Leyendo segunda perspectiva...", C_PANEL_SEC)
                     self._audio.speak(_clean_for_tts(f"Segunda perspectiva. {b}"))
 
                 self._ui(self.avatar.set_pose, "happy")
-                self._ui(self._set_status, "✅ Debate completado", C_STATUS_OK)
+                self._ui(self._set_status, "Debate completado", C_STATUS_OK)
 
             except Exception as exc:
-                self._ui(self._set_status, f"❌ Error debate: {exc}", C_RED_ERR)
+                self._ui(self._set_status, f"Error debate: {exc}", C_RED_ERR)
                 self._ui(self.avatar.set_pose, "error")
             finally:
                 self._ui(lambda: self._btn_voice.config(state="normal"))
@@ -1739,7 +1739,7 @@ class AdelaBot:
 
     def _ask_adela(self) -> None:
         if not self._ai:
-            self._ui(self._set_status, "❌ OpenAI no configurada", C_RED_ERR)
+            self._ui(self._set_status, "OpenAI no configurada", C_RED_ERR)
             return
         if not self._session_memory:
             messagebox.showinfo(
@@ -1786,10 +1786,10 @@ class AdelaBot:
                     self._ui(self._set_status, "Respondiendo...", C_PANEL_SEC)
                     self._audio.speak(_clean_for_tts(answer))
                     self._ui(self.avatar.set_pose, "happy")
-                    self._ui(self._set_status, "✅ Respuesta completada", C_STATUS_OK)
+                    self._ui(self._set_status, "Respuesta completada", C_STATUS_OK)
 
                 except Exception as exc:
-                    self._ui(self._set_status, f"❌ Error: {exc}", C_RED_ERR)
+                    self._ui(self._set_status, f"Error: {exc}", C_RED_ERR)
                     self._ui(self.avatar.set_pose, "error")
                 finally:
                     self._ui(lambda: self._btn_voice.config(state="normal"))
@@ -1810,7 +1810,7 @@ class AdelaBot:
     def _handle_menu(self, label: str) -> None:
         actions = {
             "Inicio":          self._go_home,
-            "Noticias de hoy": lambda: self._select_topic("💰 Economía"),
+            "Noticias de hoy": lambda: self._select_topic("Economía"),
             "Breaking News":   self._fetch_and_summarise,
             "Análisis Diario": lambda: threading.Thread(
                 target=self._daily_analysis, daemon=True).start(),
