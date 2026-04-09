@@ -1,11 +1,12 @@
 """
 AdelaBot – Asistente de Noticias con IA
-=======================================
-Asistente de escritorio que obtiene noticias en tiempo real, las resume
+.......................................
+Mi asistente de escritorio que obtiene noticias en tiempo real, las resume
 con GPT-4o-mini y las lee en voz alta con texto a voz.
 
 Funciones
----------
+..............
+
 - Navegación de noticias por tema (Economía, Deporte, Política, Sociedad, Arte)
 - Resúmenes con IA, análisis contextual y puntuación de impacto
 - Reproducción por voz con control de parada inmediata
@@ -28,7 +29,7 @@ Variables de entorno
     
     NEWS_API_KEY
 
-Uso
+Archivo
 ---
     python adela_bot.py
 
@@ -53,7 +54,7 @@ Mapa del código
     - Acciones del menú lateral
 """
 
-# Biblioteca estándar
+# Biblioteca 
 import json
 import os
 import pathlib
@@ -115,7 +116,7 @@ TOPIC_QUERIES = {
     "Arte":     "cine OR musica OR arte OR teatro OR cultura",
 }
 
-# Avatares por tema (opcional).
+# Avatares por tema por eleccion
 AVATAR_IMAGES = {
     "Economía": "avatar_economia.png",
     "Deporte":  "avatar_deporte.png",
@@ -160,14 +161,14 @@ C_GREEN      ="#22C55E"
 C_AMBER      ="#F59E0B"
 C_RED_ERR    ="#F87171"
 
-# Alias semánticos para que el código UI se lea mejor.
+# Semantica para que el código UI se lea mejor.
 C_BG        = C_BG_PRIMARY
 C_BTN_VOZ   = C_BLUE
 C_BTN_VOZ_H = C_BLUE_H
 C_HIST_BG   = C_BG_DEEP
 C_STATUS_OK = C_GREEN
 
-# Tipografías base
+# Tipografías 
 F_LOGO_A   = ("Georgia",   21, "bold")
 F_LOGO_B   = ("Segoe UI",  10, "bold")
 F_TITLE    = ("Georgia",   18, "bold")
@@ -243,7 +244,7 @@ def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
         if a.get("title") and a.get("description") and a["title"] != "[Removed]"
     ]
 
-  # Si salen pocos resultados en "es", hacemos una segunda pasada sin idioma
+  # Si salen pocos resultados en "es"(España), hacemos una segunda pasada sin idioma
   # y filtramos aquí. Es un mini hack, pero mejora cobertura.
     if len(articles) < 5:
         params_any = {
@@ -269,7 +270,7 @@ def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
 
 def _load_all_headlines(news_key: str) -> list:
     """
-    Carga artículos de todos los temas con /v2/everything.
+    Carga artículos de todos los temas 
 
     Los resultados se cachean durante :data:`CACHE_TTL` para evitar llamadas
     redundantes cuando el usuario cambia de tema rápidamente.
@@ -309,7 +310,7 @@ def _load_all_headlines(news_key: str) -> list:
 
 def _get_articles_for_topic(news_key: str, topic: str, page_size: int = 20) -> list:
     """
-    Devuelve artículos para *topic* usando caché compartida.
+    Devuelve artículos para Topic usando caché compartida.
 
     Estrategia de selección (por orden):
     1. Artículos ya etiquetados con el tema durante la carga global.
@@ -384,11 +385,11 @@ def _clean_for_tts(text: str) -> str:
 
 class AudioManager:
     """
-    Gestor de reproducción TTS seguro para hilos.
+    Gestor de reproducción TTS seguro para los hilos.
 
-    Genera audio MP3 con gTTS y lo reproduce con pygame.mixer.
-    La reproducción puede interrumpirse en cualquier momento mediante
-    :meth:`stop`, incluso durante la generación del audio.
+    Genera un audio MP3 con gTTS y lo reproduce con pygame.mixer.
+    La reproducción puede pararse en cualquier momento mediante
+    :meth:`stop`, incluso mientras se genera el audio.
     """
 
     def __init__(self):
@@ -498,7 +499,7 @@ class VoiceRecogniser:
             return None
 
 
-# NewsAI (cliente de OpenAI)
+# NewsAI (OpenAI)
 
 class NewsAI:
     """
@@ -732,7 +733,7 @@ class AvatarAdela:
                 self._avatar, {"image": new_img})
 
 
-# AdelaBot (app principal)
+# AdelaBot (La app principal)
 
 class AdelaBot:
     """
@@ -900,12 +901,12 @@ class AdelaBot:
     def _build_sidebar(self, canvas: tk.Canvas, SB_W: int, BODY: int) -> None:
         SB_BG = "#050A19"
         MENU = [
-            ("", "Inicio"),
-            ("", "Noticias de hoy"),
-            ("", "Breaking News"),
-            ("", "Análisis Diario"),
-            ("", "Tendencias"),
-            ("", "Guardadas"),
+            ("-", "Inicio"),
+            ("-", "Noticias de hoy"),
+            ("-", "Breaking News"),
+            ("-", "Análisis Diario"),
+            ("-", "Tendencias"),
+            ("-", "Guardadas"),
             ("", "Ajustes"),
         ]
         y = 24
@@ -1108,7 +1109,7 @@ class AdelaBot:
         level = "Bajo"    if score <= 2 else ("Medio"   if score == 3 else "Alto")
         self._lbl_impact.config(text=f"{bars}  {level} ({score}/5)", fg=color)
 
-  # --- Inicialización
+  # Aqui se inicia
 
     def _init_services(self) -> None:
         openai_key = os.getenv("OPENAI_API_KEY", "")
@@ -1146,7 +1147,7 @@ class AdelaBot:
             threading.Thread(
                 target=self._audio.speak, args=(text,), daemon=True).start()
 
-  # --- Ticker de titulares
+  # Ticker de titulares
 
     def _refresh_ticker_loop(self) -> None:
         """Background daemon: reload the top headlines every 2 hours."""
@@ -1198,7 +1199,7 @@ class AdelaBot:
             pass
         self.root.after(100, self._animate_ticker)
 
-  # --- Gráfico de tendencias
+  # Gráfico de tendencias
 
     def _redraw_trends(self) -> None:
         """Redraw the session-trend bar chart."""
@@ -1230,7 +1231,7 @@ class AdelaBot:
                 text=topic.split(" ")[0], fill=C_GREY_MET,
                 font=("Segoe UI", 8), tags="bars")
 
-  # --- Historial
+  # Historial de noticias
 
     def _add_to_history(self, summary: str, topic: str = "") -> None:
         hour  = datetime.now().strftime("%H:%M")
@@ -1264,7 +1265,7 @@ class AdelaBot:
 
         threading.Thread(target=_play, daemon=True).start()
 
-  # --- Favoritos
+  # Favoritos
 
     def _load_favourites(self) -> list:
         try:
@@ -1356,7 +1357,7 @@ class AdelaBot:
                   relief="flat", cursor="hand2",
                   padx=16, pady=8).pack(side="left", padx=8)
 
-  # --- Selección de tema
+  # Selección de tema
 
     def _select_topic(self, topic: str) -> None:
         self._audio.stop()
@@ -1368,7 +1369,7 @@ class AdelaBot:
         self.avatar.change_topic(topic)
         self.root.after(200, self._fetch_and_summarise)
 
-  # --- Búsqueda de noticias + flujo de IA
+  # Búsqueda de noticias + flujo de IA
 
     def _fetch_and_summarise(self) -> None:
         """Obtiene un artículo aleatorio del tema y arranca el flujo."""
@@ -1494,7 +1495,7 @@ class AdelaBot:
             self._ui(lambda: self._btn_voice.config(state="normal"))
             self._ui(lambda: self._btn_stop.config(state="disabled", fg=C_GREY_SEC))
 
-  # --- Modo voz
+  # VOZ
 
     _VOICE_TOPIC_MAP = {
         "fútbol":    "Deporte",   "futbol":    "Deporte",
@@ -1551,7 +1552,7 @@ class AdelaBot:
         self._ui(lambda: self._btn_stop.config(state="disabled",  fg=C_GREY_SEC))
         self._ui(lambda: self._btn_voice.config(state="normal"))
 
-  # --- Resumen diario
+  # Resumen diario
 
     def _daily_briefing(self) -> None:
         if not self._news_key or not self._ai:
@@ -1613,7 +1614,7 @@ class AdelaBot:
 
         threading.Thread(target=_worker, daemon=True).start()
 
-  # --- Análisis diario (resumen multitema)
+  # Análisis diario (resumen multitema)
 
     def _daily_analysis(self) -> None:
         try:
@@ -1677,7 +1678,7 @@ class AdelaBot:
             self._ui(lambda: self._btn_voice.config(state="normal"))
             self._ui(lambda: self._btn_stop.config(state="disabled", fg=C_GREY_SEC))
 
-  # --- Modo debate
+  # Modo debate
 
     def _debate_mode(self) -> None:
         if not self._ai:
@@ -1735,7 +1736,7 @@ class AdelaBot:
 
         threading.Thread(target=_worker, daemon=True).start()
 
-  # --- Pregunta a Adela (preguntas con memoria de sesión)
+  # Pregunta a Adela (preguntas con memoria de sesión)
 
     def _ask_adela(self) -> None:
         if not self._ai:
@@ -1805,7 +1806,7 @@ class AdelaBot:
                   relief="flat", cursor="hand2",
                   pady=8, padx=20).pack(pady=14)
 
-  # --- Menú lateral
+  # Menú lateral
 
     def _handle_menu(self, label: str) -> None:
         actions = {
