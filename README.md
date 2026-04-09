@@ -29,8 +29,5 @@ Implementación de un sistema de interacción híbrido que incluye:
 - **Gestión de Audio:** Pygame & gTTS
 - **Entorno de Desarrollo:** Virtualenv para gestión de dependencias y limpieza del core de Python.
 
-## Estructura y Código
-El código ha sido refactorizado recientemente siguiendo principios de modularidad y limpieza, asegurando que cada componente (interfaz, lógica de IA, servicios de audio) sea fácil de mantener y escalar.
 
----
 **Desarrollado por Adela como proyecto de especialización en automatización y desarrollo de interfaces con IA.**
