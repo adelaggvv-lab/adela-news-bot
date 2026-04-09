@@ -86,21 +86,21 @@ FAVOURITES_FILE = "favourites.json"
 TICKER_REFRESH_INTERVAL = 7200  # seconds between ticker refreshes (2 hours)
 CACHE_TTL = 3600  # seconds each per-topic cache entry is valid
 
-# Temas base. Si metemos uno nuevo, tocar queries y avatar también.
+# Temas base. Si meto uno nuevo
 
 TOPICS = {
-    "Economía": ["econom", "mercado", "bolsa", "inflaci", "empresa", "banco",
-                    "finanz", "pib", "deuda", "presupuest", "ibex", "euro",
-                    "precio", "impuest"],
+    "Economía": ["economia", "mercado", "bolsa", "infraion", "empresa", "banco",
+                    "finanza", "pib", "deuda", "presupueso", "ibex", "euro",
+                    "precio", "impuesto"],
     "Deporte":  ["deporte", "fútbol", "futbol", "baloncesto", "tenis",
                     "atletismo", "liga", "champions", "real madrid", "barcelona",
                     "selección", "gol", "nba", "mundial", "olimp"],
-    "Política": ["polític", "gobierno", "elecciones", "congreso", "partido",
+    "Política": ["política", "gobierno", "elecciones", "congreso", "partido",
                     "ministro", "presidente", "senado", "pp ", "psoe", "vox ",
                     "podemos", "parlament", "cortes", "diputad", "ayuso",
                     "sánchez", "feijóo"],
     "Sociedad": ["sociedad", "educacion", "sanidad", "salud", "clima",
-                    "medio ambiente", "cultura", "inmigr", "vivienda", "pensión",
+                    "medio ambiente", "cultura", "inmigracion", "vivienda", "pensión",
                     "trabajo", "empleo", "accidente", "crimen", "suceso"],
     "Arte":     ["arte", "música", "musica", "cine", "teatro", "exposición",
                     "festival", "concierto", "película", "serie", "libro",
@@ -217,7 +217,19 @@ def _newsapi_error(message: str) -> str:
     if "parameterinvalid" in msg or "parameter" in msg:
         return "Parámetro de búsqueda inválido."
     return f"Error NewsAPI: {message}"
+    
+    
+def limpiar_texto(texto):
+    # elimino cosas raras que a veces vienen de la API
+    if not texto:
+        return ""
 
+    texto = texto.replace("\n", " ").strip()
+
+    # a veces vienen caracteres raros
+    texto = texto.replace("’", "'").replace("“", '"')
+
+    return texto
 
 def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
     """
@@ -353,7 +365,28 @@ def _get_articles_for_topic(news_key: str, topic: str, page_size: int = 20) -> l
     _cache_ts_topic[topic] = now
     return matched
 
+def calcular_relevancia(news):
+    texto = noticia.lower()
+    score = 0
 
+    palabras_clave = ["crisis", "guerra", "inflación", "elecciones", "conflicto"]
+
+    for palabra in palabras_clave:
+        if palabra in texto:
+            score += 2
+
+    # si es muy corto, probablemente no aporta mucho
+    if len(texto) < 100:
+        score -= 1
+
+    # pequeño ajuste si parece titular sensacionalista
+    if "última hora" in texto:
+        score += 1
+
+    return score
+    
+    
+    
 # Utilidades de texto a voz
 
 _EMOJI_PATTERN = re.compile(
