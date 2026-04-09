@@ -4,8 +4,8 @@ AdelaBot – Asistente de Noticias con IA
 Mi asistente de escritorio que obtiene noticias en tiempo real, las resume
 con GPT-4o-mini y las lee en voz alta con texto a voz.
 
-Funciones
-..............
+Funciones que tiene la IA:
+
 
 - Navegación de noticias por tema (Economía, Deporte, Política, Sociedad, Arte)
 - Resúmenes con IA, análisis contextual y puntuación de impacto
@@ -19,22 +19,22 @@ Funciones
 - Ticker deslizante con titulares destacados del día
 - Imágenes opcionales del avatar por tema (PNG)
 
-Requisitos
-----------
+Requisito:
+
     pip install openai requests Pillow pygame gtts SpeechRecognition
 
-Variables de entorno
---------------------
+2 Variables de entorno que he creado
+
     OPENAI_API_KEY
     
     NEWS_API_KEY
 
-Archivo
----
+Nombre del archivo:
+
     python adela_bot.py
 
-Mapa del código
----------------
+MAPA DEL CÓDIGO:
+(resumen)
 - Utilidades de NewsAPI:
   `_is_spanish`, `_newsapi_error`, `_fetch_everything`,
   `_load_all_headlines`, `_get_articles_for_topic`
@@ -54,7 +54,7 @@ Mapa del código
     - Acciones del menú lateral
 """
 
-# Biblioteca 
+# Bibliotecas
 import json
 import os
 import pathlib
@@ -116,7 +116,7 @@ TOPIC_QUERIES = {
     "Arte":     "cine OR musica OR arte OR teatro OR cultura",
 }
 
-# Avatares por tema por eleccion
+# Pongo 5 avatares distintos para que al elegir el tema de la información la muñeca se cambie de vestimenta ajustada altema de eleccion
 AVATAR_IMAGES = {
     "Economía": "avatar_economia.png",
     "Deporte":  "avatar_deporte.png",
@@ -125,7 +125,7 @@ AVATAR_IMAGES = {
     "Arte":     "avatar_arte.png",
 }
 
-# Prompt principal de Adela.
+# Prompt principal de la CHATBOT Adela News BOT
 
 SYSTEM_PROMPT = (
     "Eres Adela, presentadora de noticias española en TV. "
@@ -143,9 +143,9 @@ SYSTEM_PROMPT = (
     "Responde SOLO con el resumen, sin etiquetas ni líneas extra."
 )
 
-# Sistema de diseño
+# EL sistema del diseño de la interfaz
 
-# Paleta de colores
+# Paleta de colores. Ha habido un estudio de colorimetría previo para dar una estética visual: formal, periodística, atractiva, con colores de la misma paleta.
 C_BG_DEEP    ="#020617"
 C_BG_PRIMARY ="#0F172A"
 C_PANEL      ="#1E293B"
@@ -183,14 +183,14 @@ F_HEADLINE = ("Georgia",   11)
 
 # Utilidades de NewsAPI
 
-# Caché compartida entre funciones de noticias.
-# Nota: es simple a propósito; para app local va bien.
+# Tiene Caché compartida entre funciones de noticias.
+# Nota: es simple a propósito; para app local va bien, no quiero nada más complejo.
 _cache_by_topic: dict[str, list]  = {}  # {topic: [article, …]}
 _cache_ts_topic: dict[str, float] = {}  # {topic: timestamp}
 _cache_all: list  = []
 _cache_all_ts: float = 0.0
 
-# Lista rápida para detectar español en titulares.
+# Lista rápida para detectar español en titulares. Tengo que filtrar por palabras la información que trae la API porque se colapsa y sólo me interesan las noticias de España donde resido.
 _SPANISH_WORDS = {
     "de", "la", "el", "en", "que", "con", "por", "los", "las", "del",
     "una", "un", "es", "se", "su", "al", "le", "ha", "lo", "no",
@@ -204,6 +204,7 @@ def _is_spanish(title: str) -> bool:
     words = set(title.lower().split())
     return len(words & _SPANISH_WORDS) >= 2
 
+#para saber si es texto en español
 
 def _newsapi_error(message: str) -> str:
     """Convierte un error de NewsAPI en un mensaje más claro."""
@@ -218,7 +219,7 @@ def _newsapi_error(message: str) -> str:
         return "Parámetro de búsqueda inválido."
     return f"Error NewsAPI: {message}"
     
-    
+   # Las APIS dan muchos errores y he tenido que cambiarlas varias veces, para saber si es el caso, pongo un mensaje de error.
 def limpiar_texto(texto):
     # elimino cosas raras que a veces vienen de la API
     if not texto:
@@ -233,7 +234,7 @@ def limpiar_texto(texto):
 
 def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
     """
-    Consulta NewsAPI /v2/everything para artículos en español.
+    Consulta a NewsAPI /v2/everything para artículos en español.
 
     Primero prueba con ``language=es``; si hay pocos resultados, hace una
     búsqueda sin idioma y filtra localmente con :func:`_is_spanish`.
@@ -256,8 +257,8 @@ def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
         if a.get("title") and a.get("description") and a["title"] != "[Removed]"
     ]
 
-  # Si salen pocos resultados en "es"(España), hacemos una segunda pasada sin idioma
-  # y filtramos aquí. Es un mini hack, pero mejora cobertura.
+  # Si salen pocos resultados en "es"(España), hace una segunda pasada sin idioma
+  # y filtramos aquí. Es un mini hack que he tenido que meter por tema colapso, pero mejora cobertura.
     if len(articles) < 5:
         params_any = {
             "q": query, "pageSize": page_size,
@@ -280,7 +281,7 @@ def _fetch_everything(news_key: str, query: str, page_size: int = 20) -> list:
     return articles
 
 
-def _load_all_headlines(news_key: str) -> list:
+def _cargar_all_headlines(news_key: str) -> list:
     """
     Carga artículos de todos los temas 
 
@@ -320,7 +321,7 @@ def _load_all_headlines(news_key: str) -> list:
     return articles
 
 
-def _get_articles_for_topic(news_key: str, topic: str, page_size: int = 20) -> list:
+def _devolver_articulos_for_topic(news_key: str, topic: str, page_size: int = 20) -> list:
     """
     Devuelve artículos para Topic usando caché compartida.
 
@@ -340,10 +341,10 @@ def _get_articles_for_topic(news_key: str, topic: str, page_size: int = 20) -> l
 
     all_articles = _load_all_headlines(news_key)
 
-  # Paso 1: usar artículos ya etiquetados en la carga global.
+  # primero uso artículos ya etiquetados en la carga global.
     matched = [a for a in all_articles if a.get("_topic") == topic]
 
-  # Paso 2: fallback por palabras clave.
+  # segundo hago el fallback por palabras clave.
     if len(matched) < 2:
         keywords = TOPICS.get(topic, [])
         if keywords:
@@ -356,7 +357,7 @@ def _get_articles_for_topic(news_key: str, topic: str, page_size: int = 20) -> l
             matched = [a for a in all_articles
                        if any(kw in _text(a) for kw in keywords)]
 
-  # Paso 3: plan B -> devolver todo lo disponible.
+  # plan B -> devolver todo lo disponible.
     if len(matched) < 2:
         matched = all_articles
 
@@ -400,7 +401,7 @@ _EMOJI_PATTERN = re.compile(
 )
 
 
-def _clean_for_tts(text: str) -> str:
+def _limpiar_tts(text: str) -> str:
     """
     Limpia emojis y prefijos de sección antes de enviar texto a gTTS para
     que la voz suene natural y no lea signos innecesarios.
@@ -434,7 +435,7 @@ class AudioManager:
         except Exception as exc:
             print(f"[AudioManager] Initialisation error: {exc}")
 
-    def speak(self, text: str) -> None:
+    def hablar(self, text: str) -> None:
         """
         Convierte *text* en voz y bloquea hasta que termina (o se detiene).
         Es seguro llamarlo desde cualquier hilo.
@@ -443,7 +444,7 @@ class AudioManager:
         tmp = pathlib.Path(tempfile.gettempdir()) / "adela_tts.mp3"
 
         try:
-  # Fase 1: generar MP3 con gTTS.
+  #1- generar MP3 con gTTS.
             if self._stop_event.is_set():
                 return
             self._generating = True
@@ -454,11 +455,11 @@ class AudioManager:
             tts.save(str(tmp))
             self._generating = False
 
-  # Fase 2: si alguien pulsó stop, salimos antes de reproducir.
+  # 2- si alguien pulsó stop, sale antes de reproducirse
             if self._stop_event.is_set():
                 return
 
-  # Fase 3: cargar y reproducir.
+  # 3- cargar y reproducir.
             try:
                 pygame.mixer.music.stop()
                 pygame.mixer.music.unload()
@@ -470,8 +471,8 @@ class AudioManager:
             pygame.mixer.music.set_volume(1.0)
             pygame.mixer.music.play()
 
-  # Fase 4: esperar y revisar stop cada 50 ms.
-  # TODO: pasar a callback/event loop para evitar polling.
+  # 4-Esperar y revisar stop cada 50 ms.
+  # Pasar a callback/event loop para evitar polling.
             while pygame.mixer.music.get_busy():
                 if self._stop_event.is_set():
                     pygame.mixer.music.stop()
@@ -532,7 +533,7 @@ class VoiceRecogniser:
             return None
 
 
-# NewsAI (OpenAI)
+# la API :NewsAI (OpenAI)
 
 class NewsAI:
     """
@@ -545,7 +546,7 @@ class NewsAI:
             raise ValueError("OPENAI_API_KEY is empty.")
         self._client = OpenAI(api_key=api_key.strip())
 
-  # Helper interno
+  # -Helper 
 
     def _complete(self, messages: list, max_tokens: int = 200,
                   temperature: float = 0.4) -> str:
@@ -559,14 +560,14 @@ class NewsAI:
 
   # Métodos públicos
 
-    def summarise(self, news_text: str) -> str:
+    def resumen(self, news_text: str) -> str:
         """Devuelve un resumen neutral de 2 frases de *news_text*."""
         return self._complete([
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user",   "content": f"Resume esta noticia:\n\n{news_text}"},
         ])
 
-    def analyse(self, summary: str) -> str:
+    def analizar(self, summary: str) -> str:
         """Devuelve una frase objetiva de contexto o implicación."""
         prompt = (
             "Eres analista de noticias neutral e imparcial. "
@@ -581,7 +582,7 @@ class NewsAI:
             max_tokens=80,
         )
 
-    def suggest_question(self, summary: str) -> str:
+    def sugerir_preguntas(self, summary: str) -> str:
         """Sugiere una pregunta natural para continuar con *summary*."""
         prompt = (
             "Sugiere UNA pregunta natural para seguir hablando "
@@ -594,8 +595,8 @@ class NewsAI:
             temperature=0.7,
         )
 
-    def score_impact(self, summary: str) -> int:
-        """Devuelve una puntuación de impacto de 1 (muy bajo) a 5 (muy alto)."""
+    def valorar_impacto(self, summary: str) -> int:
+        """Devuelve una puntuación de impacto de 1 (si es bajo) a 5 (muy alto)."""
         prompt = (
             "Puntúa el impacto social de esta noticia: "
             "1=muy bajo, 5=muy alto. RESPUESTA SOLO NÚMERO:\n\n" + summary
@@ -609,8 +610,8 @@ class NewsAI:
             return int(raw)
         except ValueError:
             return 3
-
-    def reply_with_context(self, question: str, history: list) -> str:
+#He querido poner temperatura y valorar el impacto de las noticias de 0 a 5 para que el usuario sepa al instante qué información le merece más la pena leer. Ahorra tiempo en el usuario y mejora su experiencia.
+    def responde_con_contexto(self, question: str, history: list) -> str:
         """
         Responde *question* teniendo en cuenta el *history* de la sesión.
 
@@ -627,8 +628,8 @@ class NewsAI:
             )},
         ] + history + [{"role": "user", "content": question}]
         return self._complete(messages, max_tokens=150, temperature=0.6)
-
-    def generate_debate(self, headline: str) -> tuple[str, str]:
+#Estoy viendo mucho sesgo en los resumenes de noticias y como he puesto la valoración de dos puntos de vista he decidido poner una opcción de debate que mantenga concienciado al usuario y no caiga en sesgos que polaricen.
+    def generar_debate(self, headline: str) -> tuple[str, str]:
         """
         Devuelve dos perspectivas equilibradas sobre *headline* como ``(A, B)``.
         Ninguna se presenta como superior a la otra.
@@ -663,7 +664,7 @@ class NewsAI:
         return persp_a, persp_b
 
 
-# Avatar widget
+# Avatar widget. He barajado varias posibilidades y he elegido utilizar esta bibiblioteca de Python para no complicarme: Tkinter.
 
 class AvatarAdela:
     """
@@ -692,9 +693,9 @@ class AvatarAdela:
         self._build()
         self.set_pose("normal")
 
-  # ── Privado ────────────────────────────────────────────────────────────
+  # esto es privado
 
-    def _load_image(self, filename: str) -> ImageTk.PhotoImage | None:
+    def _cargar_imagen(self, filename: str) -> ImageTk.PhotoImage | None:
         if filename in self._img_cache:
             return self._img_cache[filename]
         for path in (filename, "mi_avatar.png"):
@@ -718,7 +719,7 @@ class AvatarAdela:
             self._avatar   = c.create_text(
                 cx, ch - 40, text=".", font=("Arial", 110), anchor="s")
 
-  # Burbuja "redondeada" hecha con piezas superpuestas.
+  # Burbuja "redondeada" hecha con piezas superpuestas ( el bocadillo que tiene el avatar para hablar )
         BW, BH, r = 460, 110, 18
         BX1, BY1  = cx - BW // 2, 20
         BX2, BY2  = cx + BW // 2, BY1 + BH
@@ -744,16 +745,16 @@ class AvatarAdela:
             width=BW - 60, justify="center",
         )
 
-  # ── Público ────────────────────────────────────────────────────────────
+  #  CAMBIOS DEL AVATAR
 
-    def set_pose(self, pose: str, custom_text: str | None = None) -> None:
+    def poner_pose(self, pose: str, custom_text: str | None = None) -> None:
         text = custom_text or self._BUBBLE_TEXTS.get(pose, self._BUBBLE_TEXTS["normal"])
         try:
             self._canvas.itemconfig(self._bubble_text, text=text)
         except Exception:
             pass
 
-    def change_topic(self, topic: str) -> None:
+    def cambio_topic(self, topic: str) -> None:
         if topic == self._current_topic:
             return
         self._current_topic = topic
@@ -802,12 +803,12 @@ class AdelaBot:
         self._init_services()
         self.root.after(800, self._greet)
 
-  # Levantamos un hilo para refrescar titulares en background.
+  # Pongo un hilo para refrescar titulares en background.
         threading.Thread(target=self._refresh_ticker_loop, daemon=True).start()
 
   # --- Construcción de UI
 
-    def _build_ui(self) -> None:
+    def _construir_ui(self) -> None:
         W, H   = 1440, 900
         HDR    = 70
         BODY   = H - HDR
@@ -835,11 +836,11 @@ class AdelaBot:
 
         self.root.after(800, self._animate_ticker)
 
-    def _build_header(self, W: int, HDR: int) -> None:
+    def _construir_header(self, W: int, HDR: int) -> None:
         hdr = tk.Frame(self.root, bg=C_BG_DEEP, height=HDR)
         hdr.place(x=0, y=0, width=W, height=HDR)
 
-  # Logo.
+  # Aquí defino el LOGO
         logo = tk.Frame(hdr, bg=C_BG_DEEP)
         logo.pack(side="left", padx=24)
         tk.Label(logo, text="AdelaBot", font=F_LOGO_A,
@@ -867,7 +868,7 @@ class AdelaBot:
         self._topic_btns[list(TOPICS.keys())[0]].config(
             fg=C_WHITE, bg=C_PANEL)
 
-  # Estado + píldora de "última hora".
+  # Estado y la "última hora".
         right = tk.Frame(hdr, bg=C_BG_DEEP)
         right.pack(side="right", padx=24)
         self._lbl_status = tk.Label(
@@ -883,11 +884,12 @@ class AdelaBot:
         tk.Frame(self.root, bg="#1E293B", height=1).place(
             x=0, y=HDR, width=W)
 
-    def _build_ticker(self, W: int, HDR: int) -> None:
+    def _construir_ticker(self, W: int, HDR: int) -> None:
         BARRA_H = 34
         bar = tk.Frame(self.root, bg="#1A1400", height=BARRA_H)
         bar.place(x=0, y=HDR + 1, width=W, height=BARRA_H)
 
+        # He usado Tkinter porque es rapido, no da problemas con los hilos y no me quería complicar la vida con frameworks pesados si esto funciona perfecto.
         pill = tk.Frame(bar, bg="#D97706", padx=10)
         pill.pack(side="left", fill="y")
         tk.Label(pill, text="TOP 3 NOTICIAS HOY",
@@ -905,7 +907,7 @@ class AdelaBot:
         tk.Frame(self.root, bg="#D97706", height=1).place(
             x=0, y=HDR + BARRA_H + 1, width=W)
 
-    def _build_background(self, canvas: tk.Canvas,
+    def _construir_background(self, canvas: tk.Canvas,
                           W: int, BODY: int, SB_W: int, RP_W: int) -> None:
         try:
             bg_full = Image.open("fondo_estudio.png").resize((W, BODY), Image.LANCZOS)
@@ -931,7 +933,7 @@ class AdelaBot:
         canvas.create_line(SB_W,     0, SB_W,     BODY, fill="#334155", width=1)
         canvas.create_line(W - RP_W, 0, W - RP_W, BODY, fill="#334155", width=1)
 
-    def _build_sidebar(self, canvas: tk.Canvas, SB_W: int, BODY: int) -> None:
+    def _construir_sidebar(self, canvas: tk.Canvas, SB_W: int, BODY: int) -> None:
         SB_BG = "#050A19"
         MENU = [
             ("-", "Inicio"),
@@ -965,7 +967,7 @@ class AdelaBot:
 
         canvas.create_line(14, y + 4, SB_W - 14, y + 4, fill="#334155", width=1)
 
-  # Labels ocultas para reutilizar el top-3.
+  # Aquí dejo Labels ocultas para reutilizar el top-3.
         self._lbl_top1 = tk.Label(canvas, text="", bg=SB_BG, fg="#FCD34D",
                                   font=("Segoe UI", 8))
         self._lbl_top2 = tk.Label(canvas, text="", bg=SB_BG, fg="#FCD34D",
@@ -978,12 +980,12 @@ class AdelaBot:
                        fg=C_GREY_MET, justify="center")
         canvas.create_window(SB_W // 2, BODY - 20, window=ver, anchor="s")
 
-    def _build_avatar(self, canvas: tk.Canvas,
+    def _construir_avatar(self, canvas: tk.Canvas,
                       W: int, SB_W: int, RP_W: int, BODY: int) -> None:
         center_x  = SB_W + (W - SB_W - RP_W) // 2
         self.avatar = AvatarAdela(canvas, center_x, BODY)
 
-    def _build_right_panel(self, canvas: tk.Canvas, W: int, RP_W: int) -> None:
+    def _construir_right_panel(self, canvas: tk.Canvas, W: int, RP_W: int) -> None:
         RP_BG = "#050A19"
         RP_X  = W - RP_W
         RP_INN = RP_W - 32
@@ -1058,7 +1060,7 @@ class AdelaBot:
         canvas.create_window(RP_X + RP_W // 2, 300,
                              window=res_frame, width=RP_INN, anchor="n")
 
-        # Indicador de impacto
+        # Para que sea más atractivo he querido poner un 'Indicador de impacto' 
         impact_frame = tk.Frame(canvas, bg="#0D1E38", bd=0)
         impact_row   = tk.Frame(impact_frame, bg="#0D1E38")
         impact_row.pack(fill="x", padx=10, pady=8)
@@ -1073,7 +1075,7 @@ class AdelaBot:
         canvas.create_window(RP_X + RP_W // 2, 590,
                              window=impact_frame, width=RP_INN, anchor="n")
 
-        # Historial + gráfico de tendencias
+        # Guarda el historial +  el gráfico de tendencias
         hist_frame = tk.Frame(canvas, bg=RP_BG, bd=0)
         tk.Label(hist_frame, text="TITULARES RECIENTES",
                  font=("Segoe UI", 8, "bold"),
@@ -1100,7 +1102,7 @@ class AdelaBot:
         canvas.create_window(RP_X + RP_W // 2, 630,
                              window=hist_frame, width=RP_INN, anchor="n")
 
-  # --- Ayudantes de widgets UI
+  # Ayudas para widgets UI
 
     def _ui(self, fn, *args, **kwargs) -> None:
         """Programa *fn* para ejecutarse en el hilo principal de Tk."""
@@ -1142,7 +1144,7 @@ class AdelaBot:
         level = "Bajo"    if score <= 2 else ("Medio"   if score == 3 else "Alto")
         self._lbl_impact.config(text=f"{bars}  {level} ({score}/5)", fg=color)
 
-  # Aqui se inicia
+  # Aqui se inicia con las dos APIS
 
     def _init_services(self) -> None:
         openai_key = os.getenv("OPENAI_API_KEY", "")
@@ -1264,7 +1266,7 @@ class AdelaBot:
                 text=topic.split(" ")[0], fill=C_GREY_MET,
                 font=("Segoe UI", 8), tags="bars")
 
-  # Historial de noticias
+  # Añadir al historial de noticias
 
     def _add_to_history(self, summary: str, topic: str = "") -> None:
         hour  = datetime.now().strftime("%H:%M")
@@ -1298,7 +1300,7 @@ class AdelaBot:
 
         threading.Thread(target=_play, daemon=True).start()
 
-  # Favoritos
+  # Guardar las noticias a favoritos para que la experiencia del usuario sea más cómoda
 
     def _load_favourites(self) -> list:
         try:
@@ -1309,7 +1311,7 @@ class AdelaBot:
             pass
         return []
 
-    def _save_favourite(self, summary: str, topic: str) -> None:
+    def _salvar_favoritos(self, summary: str, topic: str) -> None:
         entry = {
             "date":  datetime.now().strftime("%Y-%m-%d %H:%M"),
             "topic": topic,
@@ -1333,7 +1335,7 @@ class AdelaBot:
             target=self._save_favourite,
             args=(text, topic), daemon=True).start()
 
-    def _export_favourites(self) -> None:
+    def _exportar_favoritos(self) -> None:
         if not self._favourites:
             messagebox.showinfo("Favoritos", "No hay favoritos guardados aún.")
             return
@@ -1352,7 +1354,7 @@ class AdelaBot:
         except Exception as exc:
             messagebox.showerror("Error", f"No se pudo exportar: {exc}")
 
-    def _show_favourites_window(self) -> None:
+    def _mostrar_favoritos_pantalla(self) -> None:
         win = tk.Toplevel(self.root)
         win.title("Favoritos guardados")
         win.geometry("600x400")
@@ -1390,7 +1392,7 @@ class AdelaBot:
                   relief="flat", cursor="hand2",
                   padx=16, pady=8).pack(side="left", padx=8)
 
-  # Selección de tema
+  # Hago selección de tema para que sea más fácil y cómodo, segmentar la búsqueda
 
     def _select_topic(self, topic: str) -> None:
         self._audio.stop()
@@ -1402,7 +1404,7 @@ class AdelaBot:
         self.avatar.change_topic(topic)
         self.root.after(200, self._fetch_and_summarise)
 
-  # Búsqueda de noticias + flujo de IA
+  # Búsqueda de noticias y el flujo de IA
 
     def _fetch_and_summarise(self) -> None:
         """Obtiene un artículo aleatorio del tema y arranca el flujo."""
@@ -1424,7 +1426,7 @@ class AdelaBot:
         self._btn_stop.config(state="normal", fg=C_GREY_SEC)
         topic = self._topic_var.get()
 
-        def _worker():
+        def _trabajar():
             try:
                 import random
                 articles = _get_articles_for_topic(
@@ -1468,8 +1470,8 @@ class AdelaBot:
 
     def _run_ai_pipeline(self, news_text: str) -> None:
         """
-        Ejecuta el flujo completo de IA para *news_text*:
-        resumir → analizar → sugerir pregunta → puntuar impacto → TTS.
+        Ejecuta el flujo completo de IA para news_text
+      Es resumir → analizar → sugerir pregunta → puntuar impacto →TTS.
         """
         try:
             self._ui(self.avatar.set_pose, "thinking")
@@ -1528,7 +1530,7 @@ class AdelaBot:
             self._ui(lambda: self._btn_voice.config(state="normal"))
             self._ui(lambda: self._btn_stop.config(state="disabled", fg=C_GREY_SEC))
 
-  # VOZ
+  # LA VOZ DEL BOT
 
     _VOICE_TOPIC_MAP = {
         "fútbol":    "Deporte",   "futbol":    "Deporte",
@@ -1550,7 +1552,7 @@ class AdelaBot:
         self._ui(lambda: self._btn_voice.config(state="disabled"))
         self._ui(lambda: self._btn_stop.config(state="normal", fg=C_GREY_SEC))
 
-        def _worker():
+        def _trabajar():
             command = self._voice.listen()
             if not command:
                 self._ui(self._set_status,
@@ -1585,7 +1587,7 @@ class AdelaBot:
         self._ui(lambda: self._btn_stop.config(state="disabled",  fg=C_GREY_SEC))
         self._ui(lambda: self._btn_voice.config(state="normal"))
 
-  # Resumen diario
+  # Hace un resumen diario por si el usuario sólo quiere leerlo directamente sin perdir nada por voz.
 
     def _daily_briefing(self) -> None:
         if not self._news_key or not self._ai:
@@ -1597,7 +1599,7 @@ class AdelaBot:
         self._ui(lambda: self._btn_voice.config(state="disabled"))
         self._ui(lambda: self._btn_stop.config(state="normal", fg=C_GREY_SEC))
 
-        def _worker():
+        def _trabajar():
             try:
                 news_items = []
                 for topic, _ in TOPICS.items():
@@ -1711,7 +1713,7 @@ class AdelaBot:
             self._ui(lambda: self._btn_voice.config(state="normal"))
             self._ui(lambda: self._btn_stop.config(state="disabled", fg=C_GREY_SEC))
 
-  # Modo debate
+  # Añado un 'MODO DEBATE) porque veo un gran sesgo en la manera de resumir las noticias y las fuentes de una tendencia parcial.
 
     def _debate_mode(self) -> None:
         if not self._ai:
@@ -1793,8 +1795,8 @@ class AdelaBot:
                          insertbackground=C_WHITE, relief="flat", width=50)
         entry.pack(padx=20, ipady=8)
         entry.focus_set()
-
-        def _send(event=None):
+#para decirle al usuario que le ha llegado el mensaje y está buscando la respuesta, para que no haya confusión.
+        def _mandar(event=None):
             question = entry.get().strip()
             if not question:
                 return
@@ -1802,7 +1804,7 @@ class AdelaBot:
             self._ui(self._set_status, "Adela está pensando...", C_BLUE)
             self._ui(self.avatar.set_pose, "thinking")
 
-            def _worker():
+            def _trabajar():
                 try:
                     answer = self._ai.reply_with_context(
                         question, self._session_memory)
@@ -1839,7 +1841,7 @@ class AdelaBot:
                   relief="flat", cursor="hand2",
                   pady=8, padx=20).pack(pady=14)
 
-  # Menú lateral
+  # Pongo un Menú lateral para que de una estética de web y vea una interfaz más completa y mostrar todas las funciones que hace el BOT de manera más vistosa.
 
     def _handle_menu(self, label: str) -> None:
         actions = {
@@ -1855,11 +1857,11 @@ class AdelaBot:
         action = actions.get(label)
         if action:
             action()
-
+#Para que se refresque al inicio.
     def _go_home(self) -> None:
         self._ui(self._set_status, "Inicio · Adela a tu servicio", C_STATUS_OK)
         self._ui(self.avatar.set_pose, "normal")
-
+#Pongo botón de tendencias porque aparte de tonicias mi intención era saber las tendencias a tiempo real en España por temas de marketing y periodismo.
     def _show_trends(self) -> None:
         self._ui(self._redraw_trends)
         self._ui(self._set_status, "Tendencias de la sesión", C_STATUS_OK)
@@ -1873,7 +1875,7 @@ class AdelaBot:
             "Establécelas y reinicia la app.")
 
 
-  # Punto de entrada
+  # Punto de entrada del ChatBOT
 
 if __name__ == "__main__":
     root = tk.Tk()
